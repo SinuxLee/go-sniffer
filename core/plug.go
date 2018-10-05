@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/gopacket"
 	hp "github.com/sinuxlee/go-sniffer/plugSrc/http/build"
+	kafka "github.com/sinuxlee/go-sniffer/plugSrc/kafka/build"
 	mongodb "github.com/sinuxlee/go-sniffer/plugSrc/mongodb/build"
 	mysql "github.com/sinuxlee/go-sniffer/plugSrc/mysql/build"
 	redis "github.com/sinuxlee/go-sniffer/plugSrc/redis/build"
@@ -64,6 +65,9 @@ func (p *Plug) LoadInternalPlugList() {
 
 	//Mongodb
 	list["mongodb"] = mongodb.NewInstance()
+
+	//kafka
+	list["kafka"] = kafka.NewInstance()
 
 	//Redis
 	list["redis"] = redis.NewInstance()
