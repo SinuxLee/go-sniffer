@@ -51,7 +51,7 @@ func (d *Dispatch) Capture() {
 	}
 	streamPool := NewStreamPool(streamFactory)
 	assembler := NewAssembler(streamPool)
-	ticker := time.Tick(time.Minute)
+	ticker := time.NewTicker(time.Minute)
 
 	//loop until ctrl+z
 	for {
@@ -68,7 +68,7 @@ func (d *Dispatch) Capture() {
 				packet.NetworkLayer().NetworkFlow(),
 				tcp, packet.Metadata().Timestamp,
 			)
-		case <-ticker:
+		case <-ticker.C:
 			assembler.FlushOlderThan(time.Now().Add(time.Minute * -2))
 		}
 	}

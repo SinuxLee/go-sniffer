@@ -6,6 +6,7 @@ import (
 	"io"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/google/gopacket"
 )
@@ -35,7 +36,8 @@ func (red Redis) ResolveStream(net, transport gopacket.Flow, r io.Reader) {
 
 	buf := bufio.NewReader(r)
 	var cmd string
-	var cmdCount = 0
+	var now int64
+	cmdCount := 0
 	for {
 
 		line, _, _ := buf.ReadLine()
@@ -49,20 +51,22 @@ func (red Redis) ResolveStream(net, transport gopacket.Flow, r io.Reader) {
 			}
 		}
 
-		//Filtering useless data
+		// Filtering useless data
 		if !strings.HasPrefix(string(line), "*") {
 			continue
 		}
 
-		//Do not display
-		if strings.EqualFold(transport.Src().String(), strconv.Itoa(red.port)) == true {
+		// Do not display
+		if strings.EqualFold(transport.Src().String(), strconv.Itoa(red.port)) {
 			continue
 		}
 
-		//run
+		// Record time and client address
+		now = time.Now().Unix()
+		cmd = fmt.Sprintf("%d [%s:%s]", now, net.Src().String(), transport.Src().String())
+
 		l := string(line[1])
 		cmdCount, _ = strconv.Atoi(l)
-		cmd = ""
 		for j := 0; j < cmdCount*2; j++ {
 			c, _, _ := buf.ReadLine()
 			if j&1 == 0 {
@@ -70,7 +74,7 @@ func (red Redis) ResolveStream(net, transport gopacket.Flow, r io.Reader) {
 			}
 			cmd += " " + string(c)
 		}
-		fmt.Println(cmd)
+		fmt.Printf("%#v\n", cmd)
 	}
 }
 
