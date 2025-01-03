@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/40t/go-sniffer/core"
+	"github.com/sinuxlee/go-sniffer/core"
 )
 
 func main() {

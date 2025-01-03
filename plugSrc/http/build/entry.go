@@ -1,28 +1,33 @@
 package build
 
 import (
-	"github.com/google/gopacket"
+	"bufio"
+	"bytes"
+	"fmt"
 	"io"
 	"log"
-	"strconv"
-	"fmt"
-	"os"
-	"bufio"
 	"net/http"
+	"os"
+	"strconv"
+	"strings"
+
+	"github.com/google/gopacket"
 )
 
 const (
-	Port       = 80
-	Version    = "0.1"
+	Port    = 80
+	Version = "0.1"
 )
 
 const (
-	CmdPort    = "-p"
+	CmdPort = "-p"
+	CmdURL  = "-u"
 )
 
 type H struct {
-	port       int
-	version    string
+	port    int
+	version string
+	url     string
 }
 
 var hp *H
@@ -30,8 +35,8 @@ var hp *H
 func NewInstance() *H {
 	if hp == nil {
 		hp = &H{
-			port   :Port,
-			version:Version,
+			port:    Port,
+			version: Version,
 		}
 	}
 	return hp
@@ -40,8 +45,10 @@ func NewInstance() *H {
 func (m *H) ResolveStream(net, transport gopacket.Flow, buf io.Reader) {
 
 	bio := bufio.NewReader(buf)
+	buff := bytes.NewBufferString("")
 	for {
 		req, err := http.ReadRequest(bio)
+		buff.Reset()
 
 		if err == io.EOF {
 			return
@@ -49,16 +56,26 @@ func (m *H) ResolveStream(net, transport gopacket.Flow, buf io.Reader) {
 			continue
 		} else {
 
-			var msg = "["
-			msg += req.Method
-			msg += "] ["
-			msg += req.Host + req.URL.String()
-			msg += "] ["
-			req.ParseForm()
-			msg += req.Form.Encode()
-			msg += "]"
+			url := req.URL.String()
+			if len(m.url) > 0 && !strings.Contains(url, m.url) {
+				req.Body.Close()
+				continue
+			}
 
-			log.Println(msg)
+			_, _ = buff.WriteString(fmt.Sprintf("[%v] ", req.Method))
+			_, _ = buff.WriteString(fmt.Sprintf("[%v%v] ", req.Host, url))
+
+			_ = buff.WriteByte('[')
+			for k, v := range req.Header {
+				_, _ = buff.WriteString(fmt.Sprintf("%v=%v,", k, v[0]))
+			}
+			_ = buff.WriteByte(']')
+
+			_ = buff.WriteByte('[')
+			_, _ = buff.ReadFrom(req.Body)
+			_ = buff.WriteByte(']')
+
+			log.Println(buff.String())
 
 			req.Body.Close()
 		}
@@ -66,31 +83,31 @@ func (m *H) ResolveStream(net, transport gopacket.Flow, buf io.Reader) {
 }
 
 func (m *H) BPFFilter() string {
-	return "tcp and port "+strconv.Itoa(m.port);
+	return "tcp and port " + strconv.Itoa(m.port)
 }
 
 func (m *H) Version() string {
 	return Version
 }
 
-func (m *H) SetFlag(flg []string)  {
+func (m *H) SetFlag(flg []string) {
 
 	c := len(flg)
-
 	if c == 0 {
 		return
 	}
-	if c >> 1 == 0 {
+	if c>>1 == 0 {
 		fmt.Println("ERR : Http Number of parameters")
 		os.Exit(1)
 	}
-	for i:=0;i<c;i=i+2 {
+
+	for i := 0; i < c; i = i + 2 {
 		key := flg[i]
 		val := flg[i+1]
 
 		switch key {
 		case CmdPort:
-			port, err := strconv.Atoi(val);
+			port, err := strconv.Atoi(val)
 			m.port = port
 			if err != nil {
 				panic("ERR : port")
@@ -98,9 +115,13 @@ func (m *H) SetFlag(flg []string)  {
 			if port < 0 || port > 65535 {
 				panic("ERR : port(0-65535)")
 			}
-			break
+		case CmdURL:
+			m.url = strings.TrimSpace(val)
+			if len(m.url) == 0 {
+				panic("ERR : url(no space)")
+			}
 		default:
-			panic("ERR : mysql's params")
+			panic("ERR : http's params")
 		}
 	}
 }
