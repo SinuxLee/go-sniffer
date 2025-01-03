@@ -10,6 +10,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/google/gopacket"
 )
@@ -75,7 +76,7 @@ func (m *H) ResolveStream(net, transport gopacket.Flow, buf io.Reader) {
 			_, _ = buff.ReadFrom(req.Body)
 			_ = buff.WriteByte(']')
 
-			log.Println(buff.String())
+			log.Println(time.Now().Format("2006-01-02 15:04:05.000") + " | " + buff.String())
 
 			req.Body.Close()
 		}

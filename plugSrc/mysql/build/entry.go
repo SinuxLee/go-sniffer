@@ -183,16 +183,15 @@ func (m *Mysql) resolvePacketTo(r io.Reader, w io.Writer) (uint8, error) {
 }
 
 func (stm *stream) resolve() {
-	for {
-		select {
-		case packet := <-stm.packets:
-			if packet.length != 0 {
-				if packet.isClientFlow {
-					stm.resolveClientPacket(packet.payload, packet.seq)
-				} else {
-					stm.resolveServerPacket(packet.payload, packet.seq)
-				}
-			}
+	for packet := range stm.packets {
+		if packet.length == 0 {
+			continue
+		}
+
+		if packet.isClientFlow {
+			stm.resolveClientPacket(packet.payload, packet.seq)
+		} else {
+			stm.resolveServerPacket(packet.payload, packet.seq)
 		}
 	}
 }

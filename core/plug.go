@@ -12,6 +12,7 @@ import (
 	hp "github.com/sinuxlee/go-sniffer/plugSrc/http/build"
 	kafka "github.com/sinuxlee/go-sniffer/plugSrc/kafka/build"
 	mongodb "github.com/sinuxlee/go-sniffer/plugSrc/mongodb/build"
+	mssql "github.com/sinuxlee/go-sniffer/plugSrc/mssql/build"
 	mysql "github.com/sinuxlee/go-sniffer/plugSrc/mysql/build"
 	redis "github.com/sinuxlee/go-sniffer/plugSrc/redis/build"
 )
@@ -60,20 +61,22 @@ func (p *Plug) LoadInternalPlugList() {
 
 	list := make(map[string]PlugInterface)
 
-	//Mysql
+	// Mysql
 	list["mysql"] = mysql.NewInstance()
 
-	//Mongodb
+	// Mongodb
 	list["mongodb"] = mongodb.NewInstance()
 
-	//kafka
+	// kafka
 	list["kafka"] = kafka.NewInstance()
 
-	//Redis
+	// Redis
 	list["redis"] = redis.NewInstance()
 
-	//Http
+	// Http
 	list["http"] = hp.NewInstance()
+
+	list["mssql"] = mssql.NewInstance()
 
 	p.InternalPlugList = list
 }
@@ -148,6 +151,8 @@ func (p *Plug) PrintList() {
 }
 
 func (p *Plug) SetOption(plugName string, plugParams []string) {
+
+	fmt.Println("internalPlug", plugName)
 
 	//Load Internal Plug
 	if internalPlug, ok := p.InternalPlugList[plugName]; ok {
