@@ -3,7 +3,7 @@ package core
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 	"path"
 	"path/filepath"
 	"plugin"
@@ -76,7 +76,7 @@ func (p *Plug) LoadInternalPlugList() {
 
 func (p *Plug) LoadExternalPlugList() {
 
-	dir, err := ioutil.ReadDir(p.dir)
+	dir, err := os.ReadDir(p.dir)
 	if err != nil {
 		return
 	}
