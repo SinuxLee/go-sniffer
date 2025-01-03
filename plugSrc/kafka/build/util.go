@@ -23,10 +23,7 @@ func GetNowStr(isClient bool) string {
 func IsEof(r io.Reader) bool {
 	buf := make([]byte, 1)
 	_, err := r.Read(buf)
-	if err != nil {
-		return true
-	}
-	return false
+	return err != nil
 }
 
 func ReadOnce() {
@@ -53,7 +50,7 @@ func ReadUint32(r io.Reader) (n uint32) {
 	return
 }
 
-func ReadInt64(r io.Reader) (err error, n int64) {
+func ReadInt64(r io.Reader) (n int64, err error) {
 	err = binary.Read(r, binary.BigEndian, &n)
 	return
 }
@@ -129,7 +126,7 @@ func ReadMessagesV1(r io.Reader) []*Message {
 	messages := make([]*Message, 0)
 	for {
 		message := Message{}
-		err, message.Offset = ReadInt64(r)
+		message.Offset, err = ReadInt64(r)
 		if err != nil {
 			if err == io.EOF {
 				break

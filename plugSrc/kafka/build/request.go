@@ -18,15 +18,15 @@ type Message struct {
 	TipOffset    int64
 }
 
-/**
+/*
 Produce request Protocol
 v0, v1 (supported in 0.9.0 or later) and v2 (supported in 0.10.0 or later)
 ProduceRequest => RequiredAcks Timeout [TopicName [Partition MessageSetSize MessageSet]]
+
 	RequiredAcks => int16
 	Timeout => int32
 	Partition => int32
 	MessageSetSize => int32
-
 */
 type ProduceReq struct {
 	TransactionalID string
@@ -108,7 +108,7 @@ func ReadProduceResponse(r io.Reader, version int16) *ProduceRsp {
 			pt := ProduceRspPartitions{}
 			pt.PartitionID = ReadInt32(r)
 			pt.Error = ReadInt16(r)
-			_, pt.Offset = ReadInt64(r)
+			pt.Offset, _ = ReadInt64(r)
 			topic.Partitions = append(topic.Partitions, pt)
 		}
 		produceRsp.Topics = append(produceRsp.Topics, topic)

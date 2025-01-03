@@ -5,7 +5,7 @@ const (
 	FetchRequest    = 1
 	OffsetRequest   = 2
 	MetadataRequest = 3
-	//Non-user facing control APIs = 4-7
+	// Non-user facing control APIs = 4-7
 	OffsetCommitRequest     = 8
 	OffsetFetchRequest      = 9
 	GroupCoordinatorRequest = 10
@@ -26,7 +26,7 @@ var RquestNameMap = map[int16]string{
 	1: "FetchRequest",
 	2: "OffsetRequest",
 	3: "MetadataRequest",
-	//Non-user facing control APIs = 4-7
+	// Non-user facing control APIs = 4-7
 	8:  "OffsetCommitRequest",
 	9:  "OffsetFetchRequest",
 	10: "GroupCoordinatorRequest",

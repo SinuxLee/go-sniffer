@@ -29,7 +29,7 @@ type stream struct {
 }
 
 type packet struct {
-	isClientFlow bool //客户端->服务器端流
+	isClientFlow bool // 客户端->服务器端流
 	messageSize  int32
 
 	requestHeader
@@ -56,7 +56,7 @@ type messageSet struct {
 
 func newMessageSet(r io.Reader) messageSet {
 	messageSet := messageSet{}
-	_, messageSet.offset = ReadInt64(r)
+	messageSet.offset, _ = ReadInt64(r)
 	messageSet.messageSize = ReadInt32(r)
 
 	return messageSet
@@ -106,7 +106,6 @@ func (m *Kafka) SetFlag(flg []string) {
 			if p < 0 || p > 65535 {
 				panic("参数不正确: 端口范围(0-65535)")
 			}
-			break
 		default:
 			panic("参数不正确")
 		}
@@ -123,10 +122,10 @@ func (m *Kafka) Version() string {
 
 func (m *Kafka) ResolveStream(net, transport gopacket.Flow, buf io.Reader) {
 
-	//uuid
+	// uuid
 	uuid := fmt.Sprintf("%v:%v", net.FastHash(), transport.FastHash())
 
-	//resolve packet
+	// resolve packet
 	if _, ok := m.source[uuid]; !ok {
 
 		var newStream = stream{
@@ -138,8 +137,8 @@ func (m *Kafka) ResolveStream(net, transport gopacket.Flow, buf io.Reader) {
 		go newStream.resolve()
 	}
 
-	//read bi-directional packet
-	//server -> client || client -> server
+	// read bi-directional packet
+	// server -> client || client -> server
 	for {
 
 		newPacket := m.newPacket(net, transport, buf)
@@ -153,27 +152,17 @@ func (m *Kafka) ResolveStream(net, transport gopacket.Flow, buf io.Reader) {
 
 func (m *Kafka) newPacket(net, transport gopacket.Flow, r io.Reader) *packet {
 
-	//read packet
+	// read packet
 	pk := packet{}
 
-	/*
-		bs := make([]byte, 0)
-		count, err := r.Read(bs)
-		if err != nil {
-			panic(err)
-		}
-		fmt.Printf("read: %d, buffer: %b", count, bs)
-		return nil
-	*/
-
-	//read messageSize
+	// read messageSize
 	pk.messageSize = ReadInt32(r)
 	if pk.messageSize == 0 {
 		return nil
 	}
 	fmt.Printf("pk.messageSize: %d\n", pk.messageSize)
 
-	//set flow direction
+	// set flow direction
 	if transport.Src().String() == strconv.Itoa(m.port) {
 		pk.isClientFlow = false
 
