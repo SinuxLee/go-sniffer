@@ -25,14 +25,6 @@ jobs:
         run: |
           choco install nmap -y
 
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v5
-        with:
-          version: latest
-          args: release --clean
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
       - name: Build
         run: |
           for /f "tokens=*" %%i in ('go env GOOS') do set OS=%%i
