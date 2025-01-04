@@ -1,4 +1,4 @@
-name: goreleaser
+name: Release Linux Product
 
 on:
   workflow_dispatch:
@@ -7,11 +7,7 @@ on:
 
 jobs:
   goreleaser:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-    
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -23,7 +19,7 @@ jobs:
         with:
           go-version: '1.22'
 
-      - name: Install libpcap
+      - name: Preinstall
         if: runner.os == 'Linux'
         run: |
           if [ -x "$(command -v apt)" ]; then
@@ -33,34 +29,18 @@ jobs:
             sudo yum update
             sudo yum install -y libpcap-devel
           fi
-
-      - name: Install libpcap
-        if: runner.os == 'Mac' || runner.os == 'macOS'
-        run: |
-          brew install libpcap
-
-      - name: Install libpcap
-        if: runner.os == 'Windows'
-        run: |
-          choco install libpcap
-
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v5
-        with:
-          version: latest
-          args: release --clean
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Build
         run: |
+          export OS=$(go env GOOS)
+          export ARCH=$(go env GOARCH)
+          
           go build -o go-sniffer main.go
-          tar -czf go-sniffer.tgz go-sniffer
-          ls -hal
+          tar -czf go-sniffer_${OS}_${ARCH}.tgz go-sniffer
+          ls -hl
 
       - name: Release
         uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            go-sniffer.tgz
+            go-sniffer_${OS}_${ARCH}.tgz
