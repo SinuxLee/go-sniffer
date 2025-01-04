@@ -30,8 +30,8 @@ jobs:
         run: |
           $OS = & go env GOOS
           $ARCH = & go env GOARCH
-          echo OS=$OS >> $GITHUB_ENV
-          echo ARCH=$ARCH >> $GITHUB_ENV
+          echo "OS=${OS}" >> $GITHUB_ENV
+          echo "ARCH=${ARCH}" >> $GITHUB_ENV
 
           go build -o go-sniffer.exe main.go
           zip -r go-sniffer_${OS}_${ARCH}.zip go-sniffer.exe

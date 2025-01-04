@@ -33,7 +33,6 @@ func NewInstance() *Redis {
 }
 
 func (red Redis) ResolveStream(net, transport gopacket.Flow, r io.Reader) {
-
 	buf := bufio.NewReader(r)
 	var cmd string
 	var now int64
