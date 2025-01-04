@@ -111,7 +111,7 @@ $ go-sniffer eth0 kafka
 ```
 ### TODO
 [ ] Unit test
-[ ] Introduction on github page
+[x] Introduction on github page
 [ ] Release product which building by Github Action
 [ ] FAQ in WIKI
 [ ] Choose device and plugin via TUI
