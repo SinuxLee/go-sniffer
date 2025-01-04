@@ -34,7 +34,7 @@ jobs:
           echo ARCH=$ARCH >> $GITHUB_ENV
 
           go build -o go-sniffer.exe main.go
-          zip -r go-sniffer_${{ env.OS }}_${{ env.ARCH }}.zip go-sniffer.exe
+          zip -r go-sniffer_$OS_$ARCH.zip go-sniffer.exe
           dir
 
       - name: Release
