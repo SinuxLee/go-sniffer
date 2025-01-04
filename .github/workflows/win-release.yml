@@ -41,4 +41,4 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            go-sniffer_${{ env.OS }}_${{ env.ARCH }}.zip
+            go-sniffer_windows_amd64.zip

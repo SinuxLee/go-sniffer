@@ -29,6 +29,11 @@ MacOs
 $ brew install libpcap
 ```
 
+Windows
+``` bash
+$ choco install nmap -y
+```
+
 You can now proceed with the official installation.  
 If you encounter problems in the `go install` process, try upgrading the go version(1.18+)
 ``` bash
