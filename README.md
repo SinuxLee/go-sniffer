@@ -15,7 +15,7 @@
 - [Http](#http)
 - [Mongodb](#mongodb)
 - [mssql](#mssql)
-- Kafka (developing)
+- [Kafka](#kafka)
 - ...
 
 ## Demo:
@@ -106,7 +106,15 @@ $ go-sniffer en0 redis
 $ go-sniffer eth0 http -p 8080
 $ go-sniffer eth1 mongodb
 $ go-sniffer eth0 mssql 
+$ go-sniffer eth0 kafka 
 
 ```
+### TODO
+[ ] Unit test
+[ ] Introduction on github page
+[ ] Release product which building by Github Action
+[ ] FAQ in WIKI
+[ ] Choose device and plugin via TUI
+
 ## License:
 [MIT](http://opensource.org/licenses/MIT)
