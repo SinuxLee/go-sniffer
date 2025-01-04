@@ -110,11 +110,11 @@ $ go-sniffer eth0 kafka
 
 ```
 ### TODO
-[ ] Unit test
-[x] Introduction on github page
-[ ] Release product which building by Github Action
-[ ] FAQ in WIKI
-[ ] Choose device and plugin via TUI
+- [ ] Unit test
+- [x] Introduction on github page
+- [ ] Release product which building by Github Action
+- [ ] FAQ in WIKI
+- [ ] Choose device and plugin via TUI
 
 ## License:
 [MIT](http://opensource.org/licenses/MIT)
