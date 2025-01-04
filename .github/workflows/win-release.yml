@@ -23,7 +23,7 @@ jobs:
       - name: Preinstall
         if: runner.os == 'Windows'
         run: |
-          choco install nmap -y
+          choco install nmap zip -y
 
       - name: Build
         run: |
