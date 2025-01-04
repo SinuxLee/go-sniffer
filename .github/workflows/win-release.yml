@@ -7,10 +7,7 @@ on:
 
 jobs:
   goreleaser:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        os: [windows-latest]
+    runs-on: windows-latest
     
     steps:
       - name: Checkout
