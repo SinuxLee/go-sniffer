@@ -28,7 +28,9 @@ jobs:
         run: |
           export OS=$(go env GOOS)
           export ARCH=$(go env GOARCH)
-          
+          echo "OS=${OS}" >> $GITHUB_ENV
+          echo "ARCH=${ARCH}" >> $GITHUB_ENV
+
           go build -o go-sniffer main.go
           tar -czf go-sniffer_${OS}_${ARCH}.tgz go-sniffer
           ls -hl
@@ -37,4 +39,4 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            go-sniffer_${OS}_${ARCH}.tgz
+            go-sniffer_${{ env.OS }}_${{ env.ARCH }}.tgz
