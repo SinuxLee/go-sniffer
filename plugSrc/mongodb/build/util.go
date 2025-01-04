@@ -34,7 +34,6 @@ func ReadInt64(r io.Reader) int64 {
 }
 
 func ReadString(r io.Reader) string {
-
 	var result []byte
 	var b = make([]byte, 1)
 	for {
@@ -56,28 +55,27 @@ func ReadString(r io.Reader) string {
 }
 
 func ReadBson2Json(r io.Reader) string {
-
-	//read len
+	// read len
 	docLen := ReadInt32(r)
 	if docLen == 0 {
 		return ""
 	}
 
-	//document []byte
+	// document []byte
 	docBytes := make([]byte, int(docLen))
 	binary.LittleEndian.PutUint32(docBytes, uint32(docLen))
 	if _, err := io.ReadFull(r, docBytes[4:]); err != nil {
 		panic(err)
 	}
 
-	//resolve document
+	// resolve document
 	var bsn bson.M
 	err := bson.Unmarshal(docBytes, &bsn)
 	if err != nil {
 		panic(err)
 	}
 
-	//format to Json
+	// format to Json
 	jsonStr, err := json.Marshal(bsn)
 	if err != nil {
 		return fmt.Sprintf("{\"error\":%s}", err.Error())

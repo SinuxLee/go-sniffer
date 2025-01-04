@@ -2,6 +2,7 @@ package build
 
 import (
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"io"
 	"strconv"
@@ -56,7 +57,6 @@ func ReadInt64(r io.Reader) (n int64, err error) {
 }
 
 func ReadString(r io.Reader) (string, int) {
-
 	l := int(ReadInt16(r))
 
 	//-1 => null
@@ -71,17 +71,6 @@ func ReadString(r io.Reader) (string, int) {
 
 	return string(str), l
 }
-
-//
-//func TryReadInt16(r io.Reader) (n int16, err error) {
-//
-//	if err := binary.Read(r, binary.BigEndian, &n); err != nil {
-//		if n == -1 {
-//			return 1,nil
-//		}
-//		panic(err)
-//	}
-//}
 
 func ReadBytes(r io.Reader) []byte {
 
@@ -131,7 +120,7 @@ func ReadMessagesV1(r io.Reader) []*Message {
 			if err == io.EOF {
 				break
 			}
-			if err != io.ErrUnexpectedEOF {
+			if !errors.Is(err, io.ErrUnexpectedEOF) {
 				fmt.Printf("read message offset , err: %+v\n", err)
 			}
 			break

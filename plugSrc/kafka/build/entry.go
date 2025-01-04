@@ -121,7 +121,6 @@ func (m *Kafka) Version() string {
 }
 
 func (m *Kafka) ResolveStream(net, transport gopacket.Flow, buf io.Reader) {
-
 	// uuid
 	uuid := fmt.Sprintf("%v:%v", net.FastHash(), transport.FastHash())
 
@@ -137,10 +136,9 @@ func (m *Kafka) ResolveStream(net, transport gopacket.Flow, buf io.Reader) {
 		go newStream.resolve()
 	}
 
-	// read bi-directional packet
+	// read bidirectional packet
 	// server -> client || client -> server
 	for {
-
 		newPacket := m.newPacket(net, transport, buf)
 		if newPacket == nil {
 			continue
@@ -151,7 +149,6 @@ func (m *Kafka) ResolveStream(net, transport gopacket.Flow, buf io.Reader) {
 }
 
 func (m *Kafka) newPacket(net, transport gopacket.Flow, r io.Reader) *packet {
-
 	// read packet
 	pk := packet{}
 

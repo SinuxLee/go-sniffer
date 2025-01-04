@@ -19,7 +19,6 @@ type Stmt struct {
 }
 
 func (stmt *Stmt) WriteToText() []byte {
-
 	var buf bytes.Buffer
 
 	str := fmt.Sprintf("Stm id[%d]: '%s';\n", stmt.ID, stmt.Query)
@@ -60,7 +59,6 @@ func (stmt *Stmt) WriteToText() []byte {
 }
 
 func (stmt *Stmt) BindArgs(nullBitmap, paramTypes, paramValues []byte) error {
-
 	args := stmt.Args
 	pos := 0
 
@@ -70,7 +68,6 @@ func (stmt *Stmt) BindArgs(nullBitmap, paramTypes, paramValues []byte) error {
 	var err error
 
 	for i := 0; i < int(stmt.ParamCount); i++ {
-
 		if nullBitmap[i>>3]&(1<<(uint(i)%8)) > 0 {
 			args[i] = nil
 			continue

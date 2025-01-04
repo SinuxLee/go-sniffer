@@ -44,7 +44,6 @@ func NewInstance() *H {
 }
 
 func (m *H) ResolveStream(net, transport gopacket.Flow, buf io.Reader) {
-
 	bio := bufio.NewReader(buf)
 	buff := bytes.NewBufferString("")
 	for {
@@ -59,7 +58,7 @@ func (m *H) ResolveStream(net, transport gopacket.Flow, buf io.Reader) {
 
 			url := req.URL.String()
 			if len(m.url) > 0 && !strings.Contains(url, m.url) {
-				req.Body.Close()
+				_ = req.Body.Close()
 				continue
 			}
 
@@ -77,8 +76,7 @@ func (m *H) ResolveStream(net, transport gopacket.Flow, buf io.Reader) {
 			_ = buff.WriteByte(']')
 
 			log.Println(time.Now().Format("2006-01-02 15:04:05.000") + " | " + buff.String())
-
-			req.Body.Close()
+			_ = req.Body.Close()
 		}
 	}
 }
@@ -92,7 +90,6 @@ func (m *H) Version() string {
 }
 
 func (m *H) SetFlag(flg []string) {
-
 	c := len(flg)
 	if c == 0 {
 		return

@@ -32,13 +32,12 @@ func NewInstance() *Redis {
 	return redis
 }
 
-func (red Redis) ResolveStream(net, transport gopacket.Flow, r io.Reader) {
+func (red *Redis) ResolveStream(net, transport gopacket.Flow, r io.Reader) {
 	buf := bufio.NewReader(r)
 	var cmd string
 	var now int64
 	cmdCount := 0
 	for {
-
 		line, _, _ := buf.ReadLine()
 
 		if len(line) == 0 {
@@ -77,7 +76,7 @@ func (red Redis) ResolveStream(net, transport gopacket.Flow, r io.Reader) {
 	}
 }
 
-// SetOption ...
+// SetFlag ...
 func (red *Redis) SetFlag(flg []string) {
 	c := len(flg)
 	if c == 0 {

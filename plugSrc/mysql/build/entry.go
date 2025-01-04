@@ -57,11 +57,10 @@ func NewInstance() *Mysql {
 }
 
 func (m *Mysql) ResolveStream(net, transport gopacket.Flow, buf io.Reader) {
-
-	//uuid
+	// uuid
 	uuid := fmt.Sprintf("%v:%v", net.FastHash(), transport.FastHash())
 
-	//generate resolve's stream
+	// generate resolve's stream
 	if _, ok := m.source[uuid]; !ok {
 
 		var newStream = stream{
@@ -73,10 +72,9 @@ func (m *Mysql) ResolveStream(net, transport gopacket.Flow, buf io.Reader) {
 		go newStream.resolve()
 	}
 
-	//read bi-directional packet
-	//server -> client || client -> server
+	// read bidirectional packet
+	// server -> client || client -> server
 	for {
-
 		newPacket := m.newPacket(net, transport, buf)
 
 		if newPacket == nil {
@@ -96,7 +94,6 @@ func (m *Mysql) Version() string {
 }
 
 func (m *Mysql) SetFlag(flg []string) {
-
 	c := len(flg)
 
 	if c == 0 {
@@ -127,8 +124,7 @@ func (m *Mysql) SetFlag(flg []string) {
 }
 
 func (m *Mysql) newPacket(net, transport gopacket.Flow, r io.Reader) *packet {
-
-	//read packet
+	// read packet
 	var payload bytes.Buffer
 	var seq uint8
 	var err error
@@ -136,7 +132,7 @@ func (m *Mysql) newPacket(net, transport gopacket.Flow, r io.Reader) *packet {
 		return nil
 	}
 
-	//close stream
+	// close stream
 	if err == io.EOF {
 		fmt.Println(net, transport, " close")
 		return nil
@@ -144,7 +140,7 @@ func (m *Mysql) newPacket(net, transport gopacket.Flow, r io.Reader) *packet {
 		fmt.Println("ERR : Unknown stream", net, transport, ":", err)
 	}
 
-	//generate new packet
+	// generate new packet
 	var pk = packet{
 		seq:     int(seq),
 		length:  payload.Len(),
@@ -160,7 +156,6 @@ func (m *Mysql) newPacket(net, transport gopacket.Flow, r io.Reader) *packet {
 }
 
 func (m *Mysql) resolvePacketTo(r io.Reader, w io.Writer) (uint8, error) {
-
 	header := make([]byte, 4)
 	if n, err := io.ReadFull(r, header); err != nil {
 		if n == 0 && err == io.EOF {
@@ -213,7 +208,6 @@ func (stm *stream) findStmtPacket(srv chan *packet, seq int) *packet {
 }
 
 func (stm *stream) resolveServerPacket(payload []byte, seq int) {
-
 	var msg = ""
 	if len(payload) == 0 {
 		return
@@ -265,14 +259,14 @@ func (stm *stream) resolveClientPacket(payload []byte, seq int) {
 			return
 		}
 
-		//fetch stm id
+		// fetch stm id
 		stmtID := binary.LittleEndian.Uint32(serverPacket.payload[1:5])
 		stmt := &Stmt{
 			ID:    stmtID,
 			Query: string(payload[1:]),
 		}
 
-		//record stm sql
+		// record stm sql
 		stm.stmtMap[stmtID] = stmt
 		stmt.FieldCount = binary.LittleEndian.Uint16(serverPacket.payload[5:7])
 		stmt.ParamCount = binary.LittleEndian.Uint16(serverPacket.payload[7:9])
@@ -312,7 +306,7 @@ func (stm *stream) resolveClientPacket(payload []byte, seq int) {
 			return
 		}
 
-		//params
+		// params
 		pos += 5
 		if stmt.ParamCount > 0 {
 
@@ -321,7 +315,7 @@ func (stm *stream) resolveClientPacket(payload []byte, seq int) {
 			nullBitmap := payload[pos : pos+step]
 			pos += step
 
-			//Parameter separator
+			// Parameter separator
 			flag := payload[pos]
 
 			pos++
@@ -329,15 +323,15 @@ func (stm *stream) resolveClientPacket(payload []byte, seq int) {
 			var pTypes []byte
 			var pValues []byte
 
-			//if flag == 1
-			//n （len = paramsCount * 2 byte）
+			// if flag == 1
+			// n （len = paramsCount * 2 byte）
 			if flag == 1 {
 				pTypes = payload[pos : pos+int(stmt.ParamCount)*2]
 				pos += int(stmt.ParamCount) * 2
 				pValues = payload[pos:]
 			}
 
-			//bind params
+			// bind params
 			err := stmt.BindArgs(nullBitmap, pTypes, pValues)
 			if err != nil {
 				log.Println("ERR : Could not bind params", err)

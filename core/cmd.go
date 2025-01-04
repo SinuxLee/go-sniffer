@@ -29,16 +29,16 @@ func NewCmd(p *Plug) *Cmd {
 	}
 }
 
-// start
+// Run ...
 func (cm *Cmd) Run() {
 
-	//print help
+	// print help
 	if len(os.Args) <= 1 {
 		cm.printHelpMessage()
 		os.Exit(1)
 	}
 
-	//parse command
+	// parse command
 	firstArg := string(os.Args[1])
 	if strings.HasPrefix(firstArg, InternalCmdPrefix) {
 		cm.parseInternalCmd()
@@ -50,8 +50,7 @@ func (cm *Cmd) Run() {
 // parse internal commend
 // like --help, --env, --device
 func (cm *Cmd) parseInternalCmd() {
-
-	arg := string(os.Args[1])
+	arg := os.Args[1]
 	cmd := strings.Trim(arg, InternalCmdPrefix)
 
 	switch cmd {
@@ -66,12 +65,12 @@ func (cm *Cmd) parseInternalCmd() {
 	case InternalDevice:
 		cm.printDevice()
 	}
+
 	os.Exit(1)
 }
 
 // usage
 func (cm *Cmd) printHelpMessage() {
-
 	fmt.Println("==================================================================================")
 	fmt.Println("[Usage]")
 	fmt.Println("")
@@ -123,7 +122,6 @@ func (cm *Cmd) printDevice() {
 
 // Parameters needed for plug-ins
 func (cm *Cmd) parsePlugCmd() {
-
 	if len(os.Args) < 3 {
 		fmt.Println("not found [Plug-in name]")
 		fmt.Println("go-sniffer [device] [plug] [plug's params(optional)]")

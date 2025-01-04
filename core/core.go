@@ -12,14 +12,13 @@ func New() Core {
 }
 
 func (c *Core) Run() {
-
-	//new plugin
+	// new plugin
 	plug := NewPlug()
 
-	//parse commend
+	// parse commend
 	cmd := NewCmd(plug)
 	cmd.Run()
 
-	//dispatch
+	// dispatch
 	NewDispatch(plug, cmd).Capture()
 }

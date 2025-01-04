@@ -19,7 +19,7 @@ type Message struct {
 }
 
 /*
-Produce request Protocol
+ProduceReq Produce request Protocol
 v0, v1 (supported in 0.9.0 or later) and v2 (supported in 0.10.0 or later)
 ProduceRequest => RequiredAcks Timeout [TopicName [Partition MessageSetSize MessageSet]]
 
@@ -46,8 +46,6 @@ type ProduceReqPartition struct {
 }
 
 func ReadProduceRequest(r io.Reader, version int16) *ProduceReq {
-	// version == 1
-
 	produceReq := ProduceReq{}
 
 	if int(version) >= ApiV3 {
@@ -95,7 +93,6 @@ type ProduceRsp struct {
 }
 
 func ReadProduceResponse(r io.Reader, version int16) *ProduceRsp {
-	// version == 1
 	produceRsp := ProduceRsp{}
 	l := ReadInt32(r)
 	produceRsp.Topics = make([]ProduceRspTopic, 0)
@@ -121,7 +118,6 @@ type MetadataReq struct {
 }
 
 func ReadMetadataRequest(r io.Reader, version int16) *MetadataReq {
-	// version == 0
 	metadataReq := MetadataReq{}
 
 	l := ReadInt32(r)
@@ -159,7 +155,6 @@ type MetadataRsp struct {
 }
 
 func ReadMetadataResponse(r io.Reader, version int16) *MetadataRsp {
-	// version == 0
 	metadataRsp := MetadataRsp{}
 
 	// read brokers

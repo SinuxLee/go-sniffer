@@ -26,15 +26,18 @@ type Plug struct {
 	ExternalPlugList map[string]ExternalPlug
 }
 
-// All internal plug-ins must implement this interface
-// ResolvePacket - entry
-// BPFFilter     - set BPF, like: mysql(tcp and port 3306)
-// SetFlag       - plug-in params
-// Version       - plug-in version
+// PlugInterface All internal plug-ins must implement this interface
 type PlugInterface interface {
+	// ResolveStream - entry
 	ResolveStream(net gopacket.Flow, transport gopacket.Flow, r io.Reader)
+
+	// BPFFilter     - set BPF, like: mysql(tcp and port 3306)
 	BPFFilter() string
+
+	// SetFlag       - plug-in params
 	SetFlag([]string)
+
+	// Version       - plug-in version
 	Version() string
 }
 
@@ -47,9 +50,7 @@ type ExternalPlug struct {
 }
 
 func NewPlug() *Plug {
-
 	var p Plug
-
 	p.dir, _ = filepath.Abs("./plug/")
 	p.LoadInternalPlugList()
 	p.LoadExternalPlugList()
@@ -58,31 +59,17 @@ func NewPlug() *Plug {
 }
 
 func (p *Plug) LoadInternalPlugList() {
-
-	list := make(map[string]PlugInterface)
-
-	// Mysql
-	list["mysql"] = mysql.NewInstance()
-
-	// Mongodb
-	list["mongodb"] = mongodb.NewInstance()
-
-	// kafka
-	list["kafka"] = kafka.NewInstance()
-
-	// Redis
-	list["redis"] = redis.NewInstance()
-
-	// Http
-	list["http"] = hp.NewInstance()
-
-	list["mssql"] = mssql.NewInstance()
-
-	p.InternalPlugList = list
+	p.InternalPlugList = map[string]PlugInterface{
+		"http":    hp.NewInstance(),
+		"redis":   redis.NewInstance(),
+		"mysql":   mysql.NewInstance(),
+		"mongodb": mongodb.NewInstance(),
+		"kafka":   kafka.NewInstance(),
+		"mssql":   mssql.NewInstance(),
+	}
 }
 
 func (p *Plug) LoadExternalPlugList() {
-
 	dir, err := os.ReadDir(p.dir)
 	if err != nil {
 		return
@@ -135,26 +122,24 @@ func (p *Plug) ChangePath(dir string) {
 }
 
 func (p *Plug) PrintList() {
-
-	//Print Internal Plug
+	// Print Internal Plug
 	for inPlugName, _ := range p.InternalPlugList {
 		fmt.Println("internal plug : " + inPlugName)
 	}
 
-	//split
+	// split
 	fmt.Println("-- --- --")
 
-	//print External Plug
+	// print External Plug
 	for exPlugName, _ := range p.ExternalPlugList {
 		fmt.Println("external plug : " + exPlugName)
 	}
 }
 
 func (p *Plug) SetOption(plugName string, plugParams []string) {
-
 	fmt.Println("internalPlug", plugName)
 
-	//Load Internal Plug
+	// Load Internal Plug
 	if internalPlug, ok := p.InternalPlugList[plugName]; ok {
 
 		p.ResolveStream = internalPlug.ResolveStream
@@ -164,23 +149,27 @@ func (p *Plug) SetOption(plugName string, plugParams []string) {
 		return
 	}
 
-	//Load External Plug
+	// Load External Plug
 	plug, err := plugin.Open("./plug/" + plugName)
 	if err != nil {
 		panic(err)
 	}
+
 	resolvePacket, err := plug.Lookup("ResolvePacket")
 	if err != nil {
 		panic(err)
 	}
+
 	setFlag, err := plug.Lookup("SetFlag")
 	if err != nil {
 		panic(err)
 	}
+
 	BPFFilter, err := plug.Lookup("BPFFilter")
 	if err != nil {
 		panic(err)
 	}
+
 	p.ResolveStream = resolvePacket.(func(net gopacket.Flow, transport gopacket.Flow, r io.Reader))
 	setFlag.(func([]string))(plugParams)
 	p.BPF = BPFFilter.(func() string)()

@@ -58,6 +58,7 @@ $ go-sniffer eth0 kafka
 - [ ] FAQ in WIKI
 - [ ] Choose device and plugin via TUI
 - [ ] Unit test
+- [ ] print db's user and database name
 
 ## License:
 [MIT](http://opensource.org/licenses/MIT)

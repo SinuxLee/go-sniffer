@@ -1,6 +1,15 @@
 package build
 
 const (
+	ApiV0 = 0
+	ApiV1 = 1
+	ApiV2 = 2
+	ApiV3 = 3
+	ApiV4 = 4
+	ApiV5 = 5
+)
+
+const (
 	ProduceRequest  = 0
 	FetchRequest    = 1
 	OffsetRequest   = 2
@@ -18,8 +27,6 @@ const (
 	APIVersionsReqKind      = 18
 	CreateTopicsReqKind     = 19
 )
-
-const ()
 
 var RquestNameMap = map[int16]string{
 	0: "ProduceRequest",
@@ -39,12 +46,3 @@ var RquestNameMap = map[int16]string{
 	18: "APIVersionsReqKind",
 	19: "CreateTopicsReqKind",
 }
-
-const (
-	ApiV0 = 0
-	ApiV1 = 1
-	ApiV2 = 2
-	ApiV3 = 3
-	ApiV4 = 4
-	ApiV5 = 5
-)

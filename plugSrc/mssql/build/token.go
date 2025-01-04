@@ -451,10 +451,7 @@ func parseToken(buf []byte) (rowCount int, msg string) {
 	}()
 
 	currentBuf := buf[:]
-
-	// fmt.Printf("buf len %x", currentBuf)
 	for {
-
 		if len(currentBuf) == 0 {
 			break
 		}
@@ -489,8 +486,8 @@ func parseToken(buf []byte) (rowCount int, msg string) {
 			currentBuf = currentBuf[8:]
 
 		case tokenError:
-			currentBuf = currentBuf[8:] //length2+Number4+State1+Class1
-			//message length
+			currentBuf = currentBuf[8:] // length2+Number4+State1+Class1
+			// message length
 			msgLength := int(binary.LittleEndian.Uint16(currentBuf[0:2]))
 			currentBuf = currentBuf[2:]
 			msgLength = msgLength * 2
@@ -499,7 +496,7 @@ func parseToken(buf []byte) (rowCount int, msg string) {
 			return
 		case tokenColMetadata:
 
-			//http://msdn.microsoft.com/en-us/library/dd357363.aspx
+			// http://msdn.microsoft.com/en-us/library/dd357363.aspx
 			count := int(binary.LittleEndian.Uint16(currentBuf[0:2]))
 			currentBuf = currentBuf[2:]
 
@@ -521,11 +518,11 @@ func parseToken(buf []byte) (rowCount int, msg string) {
 
 					currentBuf = currentBuf[pos:]
 
-					//ColName
+					// ColName
 					l := int(currentBuf[0])
 
 					currentBuf = currentBuf[1:]
-					//name
+					// name
 					currentBuf = currentBuf[l*2:]
 				}
 
@@ -572,7 +569,7 @@ func parseToken(buf []byte) (rowCount int, msg string) {
 			nameLength := int(currentBuf[0])
 			currentBuf = currentBuf[1:]
 			currentBuf = currentBuf[nameLength*2:]
-			currentBuf = currentBuf[7:] //1byte + 4 byte+2 byt
+			currentBuf = currentBuf[7:] // 1byte + 4 byte+2 byt
 			col := columnStruct{}
 			count := readTypeInfo(0, currentBuf, &col)
 			currentBuf = currentBuf[count:] //readTypeInfo
