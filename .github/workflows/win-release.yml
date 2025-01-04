@@ -27,13 +27,11 @@ jobs:
 
       - name: Build
         run: |
-          for /f "tokens=*" %%i in ('go env GOOS') do set OS=%%i
-          for /f "tokens=*" %%i in ('go env GOARCH') do set ARCH=%%i
           echo "OS=$(go env GOOS)" >> $GITHUB_ENV
           echo "ARCH=$(go env GOARCH)" >> $GITHUB_ENV
 
           go build -o go-sniffer.exe main.go
-          zip -r go-sniffer_%OS%_%ARCH%.zip go-sniffer.exe
+          zip -r go-sniffer_${{ env.OS }}_${{ env.ARCH }}.zip go-sniffer.exe
           dir
 
       - name: Release
