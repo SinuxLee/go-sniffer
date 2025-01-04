@@ -26,18 +26,19 @@ jobs:
           choco install nmap zip -y
 
       - name: Build
+        # default shell is powershell
         run: |
-          for /f "usebackq delims=" %i in (`go env GOOS`) do set GOOS=%i
-          for /f "usebackq delims=" %i in (`go env GOARCH`) do set GOARCH=%i
-          echo GOOS=%GOOS% >> $GITHUB_ENV
-          echo GOARCH=%GOARCH% >> $GITHUB_ENV
+          $OS = & go env GOOS
+          $ARCH = & go env GOARCH
+          echo OS=$OS >> $GITHUB_ENV
+          echo ARCH=$ARCH >> $GITHUB_ENV
 
           go build -o go-sniffer.exe main.go
-          zip -r go-sniffer_${{ env.GOOS }}_${{ env.GOARCH }}.zip go-sniffer.exe
+          zip -r go-sniffer_${{ env.OS }}_${{ env.ARCH }}.zip go-sniffer.exe
           dir
 
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            go-sniffer_${{ env.GOOS }}_${{ env.GOARCH }}.zip
+            go-sniffer_${{ env.OS }}_${{ env.ARCH }}.zip
