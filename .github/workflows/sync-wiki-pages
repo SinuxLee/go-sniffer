@@ -1,0 +1,25 @@
+name: Sync Wiki Pages
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  sync-wiki:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Copy Markdown files to Wiki
+        run: |
+          mkdir -p ./wiki
+          cp doc/*.md ./wiki/
+          cd wiki
+          git init
+          git config user.name "GitHub Actions"
+          git config user.email "<>"
+          git add .
+          git commit -m "Sync Wiki Pages"
+          git push --force --quiet "https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.wiki.git" master
