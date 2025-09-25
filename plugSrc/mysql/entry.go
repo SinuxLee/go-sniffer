@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -237,25 +236,23 @@ func (stm *stream) resolveServerPacket(payload []byte, seq int) {
 }
 
 func (stm *stream) resolveClientPacket(payload []byte, seq int) {
-
 	var msg string
-	switch payload[0] {
+	switch packetType := payload[0]; packetType {
 
 	case COM_INIT_DB:
-
 		msg = fmt.Sprintf("USE %s;\n", payload[1:])
+
 	case COM_DROP_DB:
-
 		msg = fmt.Sprintf("Drop DB %s;\n", payload[1:])
-	case COM_CREATE_DB, COM_QUERY:
 
+	case COM_CREATE_DB, COM_QUERY:
 		statement := string(payload[1:])
 		msg = fmt.Sprintf("%s %s", ComQueryRequestPacket, statement)
-	case COM_STMT_PREPARE:
 
+	case COM_STMT_PREPARE:
 		serverPacket := stm.findStmtPacket(stm.packets, seq+1)
 		if serverPacket == nil {
-			log.Println("ERR : Not found stm packet")
+			fmt.Println("ERR : Not found stm packet")
 			return
 		}
 
@@ -273,8 +270,8 @@ func (stm *stream) resolveClientPacket(payload []byte, seq int) {
 		stmt.Args = make([]interface{}, stmt.ParamCount)
 
 		msg = PreparePacket + stmt.Query
-	case COM_STMT_SEND_LONG_DATA:
 
+	case COM_STMT_SEND_LONG_DATA:
 		stmtID := binary.LittleEndian.Uint32(payload[1:5])
 		paramId := binary.LittleEndian.Uint16(payload[5:7])
 		stmt, _ := stm.stmtMap[stmtID]
@@ -289,20 +286,19 @@ func (stm *stream) resolveClientPacket(payload []byte, seq int) {
 		}
 		return
 	case COM_STMT_RESET:
-
 		stmtID := binary.LittleEndian.Uint32(payload[1:5])
 		stmt, _ := stm.stmtMap[stmtID]
 		stmt.Args = make([]interface{}, stmt.ParamCount)
+
 		return
 	case COM_STMT_EXECUTE:
-
 		var pos = 1
 		stmtID := binary.LittleEndian.Uint32(payload[pos : pos+4])
 		pos += 4
 		var stmt *Stmt
 		var ok bool
 		if stmt, ok = stm.stmtMap[stmtID]; ok == false {
-			log.Println("ERR : Not found stm id", stmtID)
+			fmt.Println("ERR : Not found stm id", stmtID)
 			return
 		}
 
@@ -334,11 +330,13 @@ func (stm *stream) resolveClientPacket(payload []byte, seq int) {
 			// bind params
 			err := stmt.BindArgs(nullBitmap, pTypes, pValues)
 			if err != nil {
-				log.Println("ERR : Could not bind params", err)
+				fmt.Println("ERR : Could not bind params", err)
 			}
 		}
 		msg = string(stmt.WriteToText())
+
 	default:
+		fmt.Println("ERR : Unknown MySQL packet", packetType)
 		return
 	}
 

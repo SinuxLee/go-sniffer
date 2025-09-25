@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/sinuxlee/go-sniffer/plugSrc/mongodb/build/internal/json"
+	"github.com/sinuxlee/go-sniffer/plugSrc/mongodb/internal/json"
 )
 
 // UnmarshalJSON unmarshals a JSON value that may hold non-standard

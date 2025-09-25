@@ -7,7 +7,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/sinuxlee/go-sniffer/plugSrc/mongodb/build/bson"
+	"github.com/sinuxlee/go-sniffer/plugSrc/mongodb/bson"
 )
 
 func GetNowStr(isClient bool) string {

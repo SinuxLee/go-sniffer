@@ -9,22 +9,13 @@ import (
 	"plugin"
 
 	"github.com/google/gopacket"
-	hp "github.com/sinuxlee/go-sniffer/plugSrc/http/build"
-	kafka "github.com/sinuxlee/go-sniffer/plugSrc/kafka/build"
-	mongodb "github.com/sinuxlee/go-sniffer/plugSrc/mongodb/build"
-	mssql "github.com/sinuxlee/go-sniffer/plugSrc/mssql/build"
-	mysql "github.com/sinuxlee/go-sniffer/plugSrc/mysql/build"
-	redis "github.com/sinuxlee/go-sniffer/plugSrc/redis/build"
+	hp "github.com/sinuxlee/go-sniffer/plugSrc/http"
+	kafka "github.com/sinuxlee/go-sniffer/plugSrc/kafka"
+	mongodb "github.com/sinuxlee/go-sniffer/plugSrc/mongodb"
+	mssql "github.com/sinuxlee/go-sniffer/plugSrc/mssql"
+	mysql "github.com/sinuxlee/go-sniffer/plugSrc/mysql"
+	redis "github.com/sinuxlee/go-sniffer/plugSrc/redis"
 )
-
-type Plug struct {
-	dir           string
-	ResolveStream func(net gopacket.Flow, transport gopacket.Flow, r io.Reader)
-	BPF           string
-
-	InternalPlugList map[string]PlugInterface
-	ExternalPlugList map[string]ExternalPlug
-}
 
 // PlugInterface All internal plug-ins must implement this interface
 type PlugInterface interface {
@@ -41,6 +32,15 @@ type PlugInterface interface {
 	Version() string
 }
 
+type Plug struct {
+	dir           string
+	ResolveStream func(net gopacket.Flow, transport gopacket.Flow, r io.Reader)
+	BPF           string
+
+	InternalPlugList map[string]PlugInterface
+	ExternalPlugList map[string]ExternalPlug
+}
+
 type ExternalPlug struct {
 	Name          string
 	Version       string
@@ -49,13 +49,16 @@ type ExternalPlug struct {
 	SetFlag       func([]string)
 }
 
-func NewPlug() *Plug {
+func NewPlug() (*Plug, error) {
 	var p Plug
 	p.dir, _ = filepath.Abs("./plug/")
 	p.LoadInternalPlugList()
-	p.LoadExternalPlugList()
+	err := p.LoadExternalPlugList()
+	if err != nil {
+		return nil, err
+	}
 
-	return &p
+	return &p, nil
 }
 
 func (p *Plug) LoadInternalPlugList() {
@@ -69,10 +72,10 @@ func (p *Plug) LoadInternalPlugList() {
 	}
 }
 
-func (p *Plug) LoadExternalPlugList() {
+func (p *Plug) LoadExternalPlugList() error {
 	dir, err := os.ReadDir(p.dir)
 	if err != nil {
-		return
+		return err
 	}
 
 	p.ExternalPlugList = make(map[string]ExternalPlug)
@@ -83,27 +86,27 @@ func (p *Plug) LoadExternalPlugList() {
 
 		plug, err := plugin.Open(p.dir + "/" + fi.Name())
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		versionFunc, err := plug.Lookup("Version")
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		setFlagFunc, err := plug.Lookup("SetFlag")
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		BPFFilterFunc, err := plug.Lookup("BPFFilter")
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		ResolvePacketFunc, err := plug.Lookup("ResolvePacket")
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		version := versionFunc.(func() string)()
@@ -115,6 +118,8 @@ func (p *Plug) LoadExternalPlugList() {
 			Name:          fi.Name(),
 		}
 	}
+
+	return nil
 }
 
 func (p *Plug) ChangePath(dir string) {
@@ -123,7 +128,7 @@ func (p *Plug) ChangePath(dir string) {
 
 func (p *Plug) PrintList() {
 	// Print Internal Plug
-	for inPlugName, _ := range p.InternalPlugList {
+	for inPlugName := range p.InternalPlugList {
 		fmt.Println("internal plug : " + inPlugName)
 	}
 
@@ -131,46 +136,47 @@ func (p *Plug) PrintList() {
 	fmt.Println("-- --- --")
 
 	// print External Plug
-	for exPlugName, _ := range p.ExternalPlugList {
+	for exPlugName := range p.ExternalPlugList {
 		fmt.Println("external plug : " + exPlugName)
 	}
 }
 
-func (p *Plug) SetOption(plugName string, plugParams []string) {
+func (p *Plug) SetOption(plugName string, plugParams []string) error {
 	fmt.Println("internalPlug", plugName)
 
 	// Load Internal Plug
 	if internalPlug, ok := p.InternalPlugList[plugName]; ok {
-
 		p.ResolveStream = internalPlug.ResolveStream
 		internalPlug.SetFlag(plugParams)
 		p.BPF = internalPlug.BPFFilter()
 
-		return
+		return nil
 	}
 
 	// Load External Plug
 	plug, err := plugin.Open("./plug/" + plugName)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	resolvePacket, err := plug.Lookup("ResolvePacket")
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	setFlag, err := plug.Lookup("SetFlag")
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	BPFFilter, err := plug.Lookup("BPFFilter")
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	p.ResolveStream = resolvePacket.(func(net gopacket.Flow, transport gopacket.Flow, r io.Reader))
 	setFlag.(func([]string))(plugParams)
 	p.BPF = BPFFilter.(func() string)()
+
+	return nil
 }

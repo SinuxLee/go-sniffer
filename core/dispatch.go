@@ -2,7 +2,6 @@ package core
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/google/gopacket"
@@ -13,15 +12,14 @@ import (
 )
 
 type Dispatch struct {
-	device  string
-	payload []byte
-	Plug    *Plug
+	device string
+	Plug   *Plug
 }
 
-func NewDispatch(plug *Plug, cmd *Cmd) *Dispatch {
+func NewDispatch(plug *Plug, device string) *Dispatch {
 	return &Dispatch{
 		Plug:   plug,
-		device: cmd.Device,
+		device: device,
 	}
 }
 
@@ -29,7 +27,7 @@ func (d *Dispatch) Capture() {
 	// init device
 	handle, err := pcap.OpenLive(d.device, 65535, false, pcap.BlockForever)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 		return
 	}
 
@@ -37,7 +35,7 @@ func (d *Dispatch) Capture() {
 	fmt.Println(d.Plug.BPF)
 	err = handle.SetBPFFilter(d.Plug.BPF)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 	}
 
 	// capture
@@ -78,23 +76,19 @@ type ProtocolStreamFactory struct {
 }
 
 type ProtocolStream struct {
-	net, transport gopacket.Flow
-	r              tcpreader.ReaderStream
+	r tcpreader.ReaderStream
 }
 
 func (m *ProtocolStreamFactory) New(net, transport gopacket.Flow) tcpassembly.Stream {
-
-	//init stream struct
+	// init stream struct
 	stm := &ProtocolStream{
-		net:       net,
-		transport: transport,
-		r:         tcpreader.NewReaderStream(),
+		r: tcpreader.NewReaderStream(),
 	}
 
-	//new stream
+	// new stream
 	fmt.Println("# Start new stream:", net, transport)
 
-	//decode packet
+	// decode packet
 	go m.dispatch.Plug.ResolveStream(net, transport, &(stm.r))
 
 	return &(stm.r)

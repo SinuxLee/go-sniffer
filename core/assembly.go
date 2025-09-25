@@ -84,7 +84,6 @@ const pageBytes = 1900
 type page struct {
 	tcpassembly.Reassembly
 	seq        Sequence
-	index      int
 	prev, next *page
 	buf        [pageBytes]byte
 }

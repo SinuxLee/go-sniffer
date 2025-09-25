@@ -156,8 +156,7 @@ func (stm *stream) resolveServerPacket(pk *packet) {
 
 func (stm *stream) resolveClientPacket(pk *packet) {
 	var msg string
-	switch pk.opCode {
-
+	switch opCode := pk.opCode; opCode {
 	case OP_UPDATE:
 		zero := ReadInt32(pk.payload)
 		fullCollectionName := ReadString(pk.payload)
@@ -246,6 +245,7 @@ func (stm *stream) resolveClientPacket(pk *packet) {
 	case OP_MSG:
 		return
 	default:
+		fmt.Println("ERR : Unknown MongoDB packet", pk.opCode)
 		return
 	}
 

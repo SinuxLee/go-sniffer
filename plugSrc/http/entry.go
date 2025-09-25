@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -75,7 +74,7 @@ func (m *H) ResolveStream(net, transport gopacket.Flow, buf io.Reader) {
 			_, _ = buff.ReadFrom(req.Body)
 			_ = buff.WriteByte(']')
 
-			log.Println(time.Now().Format("2006-01-02 15:04:05.000") + " | " + buff.String())
+			fmt.Println(time.Now().Format("2006-01-02 15:04:05.000") + " | " + buff.String())
 			_ = req.Body.Close()
 		}
 	}
